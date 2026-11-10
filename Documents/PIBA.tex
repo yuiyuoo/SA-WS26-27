@@ -1,0 +1,96 @@
+% PIBA Template -- Software Architecture Lab, WS 2026/27, University of Stuttgart
+% Rules: the whole PIBA must fit on ONE page. Do not change font size or margins.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[colorlinks,urlcolor=blue,linkcolor=black]{hyperref}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\setlist{itemsep=0.1em, topsep=0.2em}
+
+
+\newcommand{\pibapart}[1]{\vspace{0.4em}{\large\textbf{#1}}\par}
+
+\newcommand{\projecttitle}{AI-Assisted Patient Intake and Pre-Consultation Summaries}
+\newcommand{\teamname}{Team Paris}
+\newcommand{\teammembers}{Chillara, Rohit; Altinok, Celina; Xenitopoulos, Perikles; Jonquay, Timoth\'ee; Vu, Thi~Trang~Anh; Ratinaud, Lou}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE\textbf{\projecttitle}}\\[0.4em]
+  {\large PIBA -- Software Architecture Lab, WS 2026/27}\\[0.3em]
+  \textbf{\teamname}: \teammembers
+\end{center}
+
+% ---------------------------------------------------------------------------
+\pibapart{Problem}
+In most hospitals, patients describe their condition on paper or digital forms,
+often several times per visit, before a doctor sees them. Staff transcribe and sort them by hand, and doctors read them and the
+patient's history separately. Under staff shortages details get lost or arrive
+late, and in long-term care nurses spend up to a third of their working time on
+documentation (\href{https://doi.org/10.2196/86078}{Schwabe et al., 2026}). Patients, in turn, have to describe
+symptoms in medical terms they often do not understand. EHR systems store data but do not summarise it, and existing intake tools (e.g.\ Ada, Infermedica) send data to one vendor model with no control over where it is processed.
+
+% ---------------------------------------------------------------------------
+\pibapart{Idea}
+An LLM-based intake assistant that talks to the patient in plain language,
+combines the answers with their history from the hospital database, and hands
+the doctor a structured summary (complaint, history, warnings such as
+allergies). The architectural core is a \textbf{privacy-aware LLM gateway}:
+a \textbf{pseudonymiser} strips identifiers, a \textbf{router} sends
+identifiable data to a small \textbf{local model} and de-identified text to a
+stronger \textbf{cloud model}, and \textbf{guardrails} check both directions.
+Around it: a \textbf{patient chat client}, an \textbf{intake orchestrator}
+driving the dialogue, a read-only \textbf{EHR adapter} (HL7 FHIR), and a
+\textbf{summary service with clinician dashboard}. Style: layered modular
+monolith, so all privacy rules live in one gateway. Key trade-off:
+\textbf{privacy vs.\ summary quality vs.\ cost}, made explicit as routing
+rules. Quality attributes: privacy (\href{https://eur-lex.europa.eu/eli/reg/2016/679/oj}{Art.~9 GDPR}),
+correctness, usability for non-experts. Out of scope: diagnosis or treatment
+advice; writing back to the hospital database.
+
+% ---------------------------------------------------------------------------
+\pibapart{Benefits}
+\begin{itemize}
+  \item \textbf{Less documentation work for staff} -- addresses manual
+        transcription and sorting of intake data; shown by time per
+        intake, manual form vs.\ assistant; a speech assistant cut nursing documentation time by about 28\%
+        (\href{https://doi.org/10.2196/86078}{Schwabe et al., 2026}).
+  \item \textbf{Faster, better-informed consultations} -- addresses scattered
+        information; demonstrated by accuracy of
+        summaries against the synthetic ground-truth records.
+  \item \textbf{Easier intake for patients} -- addresses medical jargon on
+        forms; shown by test-user feedback.
+\end{itemize}
+Context: Europe's digital health market grows a projected 22.3\% p.a.\ (2024--2030), partly driven by staff shortages (\href{https://www.grandviewresearch.com/industry-analysis/europe-digital-health-market-report}{Grand View Research}).
+
+% ---------------------------------------------------------------------------
+\pibapart{Action}
+\begin{enumerate}
+  \item W1--3: requirements from interviews and surveys (clinicians or medical
+        students as proxy users); quality-attribute scenarios; architecture and ADRs.
+  \item W4--8, \textbf{minimum deliverable:} chat client, orchestrator, gateway
+        with routing, and summary view on synthetic patient data.
+  \item W9--10: pseudonymiser, guardrails, EHR adapter.
+  \item W11--12: evaluation against the benefits; W13: buffer.
+\end{enumerate}
+Stack: Python/FastAPI, Ollama (local model), OpenRouter (cloud model), HAPI
+FHIR, Synthea synthetic patients, React, Docker. No real patient data is used.
+
+% ---------------------------------------------------------------------------
+\vfill
+{\small\textbf{AI usage statement.} Claude Opus 5.5 (via claude.ai) for
+brainstorming, restructuring the text into this template, and checking cited
+sources. All content was reviewed and verified by the team.}
+
+\end{document}
