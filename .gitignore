@@ -1,1 +1,10 @@
 .env
+data/
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+# LaTeX build output
+*.aux
+*.log
+*.out
