@@ -1,5 +1,6 @@
 .env
-data/
+data/synthea/*
+!data/synthea/.gitkeep
 node_modules/
 __pycache__/
 *.pyc
